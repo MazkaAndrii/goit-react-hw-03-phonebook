@@ -11,7 +11,7 @@ const Input = ({ type, name, pattern, title, value, onChange }) => {
       title={title}
       required
       value={value}
-      onChange={onchange}
+      onChange={onChange}
     />
   );
 };

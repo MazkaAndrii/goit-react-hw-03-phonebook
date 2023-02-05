@@ -1,11 +1,16 @@
 import React, { Component } from 'react';
+import ContactsList from './Phonebook/ContactsList/ContactsList';
+import Filter from './Phonebook/Filter/Filter';
 import Form from './Phonebook/Form/Form';
+import { nanoid } from 'nanoid/non-secure';
+import css from './Phonebook.module.css';
 
 export const App = () => {
   return (
     <div
       style={{
         height: '100vh',
+        padding: '20px',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -13,7 +18,7 @@ export const App = () => {
         color: '#010101',
       }}
     >
-      <Form />
+      <Phonebook />
     </div>
   );
 };
@@ -28,4 +33,70 @@ class Phonebook extends Component {
     ],
     filter: '',
   };
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.contacts !== this.state.contacts) {
+      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+    }
+  }
+
+  componentDidMount() {
+    const contacts = localStorage.getItem('contacts');
+    if (contacts) {
+      this.setState({ contacts: JSON.parse(contacts) });
+    }
+  }
+
+  changeFilter = event => {
+    this.setState({
+      filter: event.currentTarget.value,
+    });
+  };
+
+  formSubmitHandler = data => {
+    const newContact = {
+      id: nanoid(),
+      name: data.name,
+      number: data.number,
+    };
+
+    this.state.contacts.find(
+      contact => contact.name.toLowerCase() === data.name.toLowerCase()
+    )
+      ? alert(`${data.name} is already in contacts`)
+      : this.setState({
+          contacts: [...this.state.contacts, newContact],
+        });
+  };
+
+  deleteContact = contactId => {
+    this.setState(prevState => ({
+      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
+    }));
+  };
+
+  render() {
+    const normalizedFilter = this.state.filter.toLowerCase();
+    const visibleContacts = this.state.contacts.filter(contact => {
+      return contact.name.toLowerCase().includes(normalizedFilter);
+    });
+    return (
+      <div className={css.container}>
+        <Form onSubmit={this.formSubmitHandler} />
+        <ContactsList
+          title="Contacts"
+          contacts={visibleContacts}
+          onDeleteContact={this.deleteContact}
+        >
+          <Filter
+            onChange={this.changeFilter}
+            type="text"
+            value={this.state.filter}
+            name="filter"
+            title=""
+            pattern=""
+          />
+        </ContactsList>
+      </div>
+    );
+  }
 }
