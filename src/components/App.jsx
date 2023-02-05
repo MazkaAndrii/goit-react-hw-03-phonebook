@@ -10,6 +10,7 @@ export const App = () => {
     <div
       style={{
         height: '100vh',
+        padding: '20px',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -21,7 +22,6 @@ export const App = () => {
     </div>
   );
 };
-
 class Phonebook extends Component {
   state = {
     contacts: [
@@ -32,6 +32,18 @@ class Phonebook extends Component {
     ],
     filter: '',
   };
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.contacts !== this.state.contacts) {
+      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+    }
+  }
+
+  componentDidMount() {
+    const contacts = localStorage.getItem('contacts');
+    if (contacts) {
+      this.setState({ contacts: JSON.parse(contacts) });
+    }
+  }
 
   changeFilter = event => {
     this.setState({
